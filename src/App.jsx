@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Send, CheckCircle, Building2 } from 'lucide-react';
-import logo from './assets/logo.png'; 
+import logo from './assets/logo.png';
 
 const ClientFormLanding = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +19,7 @@ const ClientFormLanding = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [submitError, setSubmitError] = useState('');
+  const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,30 +29,50 @@ const ClientFormLanding = () => {
     }));
   };
 
-  // Función para codificar datos para Netlify
-  const encode = (data) => {
-    return Object.keys(data)
-      .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(data[key]))
-      .join("&")
-  }
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsSubmitting(true);
-    setSubmitError('');
+    setError('');
 
     try {
-      const response = await fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: encode({
-          "form-name": "client-form",
-          ...formData
-        })
+      // OPCIÓN 1: Usar hash MD5 de tu email (más seguro)
+      // Ve a https://www.md5hashgenerator.com/ y genera el hash de tu email
+      // Ejemplo: si tu email es "juan@empresa.com", usa el hash MD5
+      const emailHash = '4c9292f0c20eb062dc28ccaef55ba9ed'; // REEMPLAZA con el hash MD5 de tu email
+      const formSubmitUrl = `https://formsubmit.co/${emailHash}`;
+
+      // OPCIÓN 2 (alternativa): Usar variable de entorno si tienes backend
+      // const formSubmitUrl = `https://formsubmit.co/${process.env.REACT_APP_EMAIL_HASH}`;
+
+      // Preparar datos para FormSubmit
+      const formData_submit = new FormData();
+      formData_submit.append('Empresa', formData.nombreEmpresa);
+      formData_submit.append('Persona_a_cargo', formData.nombrePersonaCargo);
+      formData_submit.append('Contacto', formData.contacto);
+      formData_submit.append('CUIT', formData.cuit);
+      formData_submit.append('Email_cliente', formData.email);
+      formData_submit.append('Telefono', formData.telefono);
+      formData_submit.append('Direccion', formData.direccion);
+      formData_submit.append('Consumidor_IVA', formData.consumidorFinalIVA);
+      formData_submit.append('Horario_Corte', formData.horarioCorte);
+      formData_submit.append('Horario_Colecta', formData.horarioColecta);
+      formData_submit.append('Servicio_Fullfilment', formData.servicioFullfilment);
+      
+      // Configuraciones adicionales de FormSubmit
+      formData_submit.append('_subject', '🏢 Nuevo Cliente - ' + formData.nombreEmpresa);
+      formData_submit.append('_captcha', 'false'); // Desactiva captcha
+      formData_submit.append('_template', 'table'); // Template tipo tabla
+      formData_submit.append('_next', window.location.href); // Redirect después del envío
+      
+      // Respuesta automática al cliente (opcional)
+      formData_submit.append('_autoresponse', 'Gracias por contactarnos. Hemos recibido tu información.');
+
+      // Envío con FormSubmit
+      const response = await fetch(formSubmitUrl, {
+        method: 'POST',
+        body: formData_submit
       });
 
       if (response.ok) {
-        console.log('Datos del formulario enviados:', formData);
         setIsSubmitted(true);
         
         // Resetear después de 3 segundos
@@ -73,11 +93,11 @@ const ClientFormLanding = () => {
           });
         }, 3000);
       } else {
-        throw new Error('Error en el envío');
+        throw new Error('Error al enviar el formulario');
       }
-    } catch (error) {
-      console.error('Error:', error);
-      setSubmitError('Hubo un error al enviar el formulario. Por favor, inténtalo de nuevo.');
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Error al enviar el formulario. Por favor, intenta nuevamente.');
     } finally {
       setIsSubmitting(false);
     }
@@ -89,7 +109,7 @@ const ClientFormLanding = () => {
         <div className="text-center p-8">
           <CheckCircle className="w-20 h-20 text-green-400 mx-auto mb-6 animate-pulse" />
           <h2 className="text-3xl font-bold text-white mb-4">¡Formulario Enviado!</h2>
-          <p className="text-purple-100 text-lg">Gracias por completar tu información. Te contactaremos pronto.</p>
+          {/* <p className="text-purple-100 text-lg">Gracias por completar tu información.</p> */}
         </div>
       </div>
     );
@@ -97,32 +117,6 @@ const ClientFormLanding = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800">
-      {/* FORMULARIO OCULTO PARA NETLIFY - MUY IMPORTANTE */}
-      <form 
-        name="client-form" 
-        netlify 
-        netlify-honeypot="bot-field" 
-        hidden
-      >
-        <input type="text" name="nombreEmpresa" />
-        <input type="text" name="nombrePersonaCargo" />
-        <input type="text" name="contacto" />
-        <input type="text" name="cuit" />
-        <input type="email" name="email" />
-        <input type="tel" name="telefono" />
-        <input type="text" name="direccion" />
-        <select name="consumidorFinalIVA">
-          <option value="consumidor_final">Consumidor Final</option>
-          <option value="responsable_inscripto">Responsable Inscripto</option>
-          <option value="exento">Exento</option>
-          <option value="monotributo">Monotributo</option>
-        </select>
-        <textarea name="horarioCorte"></textarea>
-        <textarea name="horarioColecta"></textarea>
-        <input type="radio" name="servicioFullfilment" value="SI" />
-        <input type="radio" name="servicioFullfilment" value="NO" />
-      </form>
-
       {/* Header */}
       <header className="bg-purple-700 shadow-2xl border-b border-purple-500">
         <div className="max-w-7xl mx-auto px-6 py-8">
@@ -131,8 +125,6 @@ const ClientFormLanding = () => {
               <img src={logo} alt="logo" />
             </div>
             <h1 className="text-purple-200 text-4xl font-extrabold mb-6 leading-tight">Planilla de altas - clientes</h1>
-            <div>
-            </div>
           </div>
         </div>
       </header>
@@ -140,9 +132,6 @@ const ClientFormLanding = () => {
       {/* Hero Section */}
       <section className="py-12 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          {/* <h2 className="text-4xl font-extrabold text-white mb-6 leading-tight">
-            Planilla de altas - clientes
-          </h2> */}
           <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-8">
             <p className="text-xl text-purple-100">
               Hola, a continuación les dejamos los siguientes ítems para completar. 
@@ -157,10 +146,10 @@ const ClientFormLanding = () => {
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-100">
             <div className="space-y-8">
-              {/* Error message */}
-              {submitError && (
+              
+              {error && (
                 <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-4">
-                  <p className="text-red-700 text-center">{submitError}</p>
+                  <p className="text-red-700 text-center font-semibold">{error}</p>
                 </div>
               )}
 
@@ -397,7 +386,7 @@ const ClientFormLanding = () => {
       <footer className="bg-purple-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
-            <img src={logo} alt="logo" className=' text-purple-300'/>
+            <img src={logo} alt="logo" />
           </div>
           <p className="text-purple-200 text-lg">
             Soluciones logísticas profesionales
