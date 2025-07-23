@@ -456,8 +456,57 @@ const ClientFormLanding = () => {
     setError('');
     setIsSubmitting(true);
     
-    // Enviar el formulario de manera tradicional
-    e.target.submit();
+    // Crear un formulario temporal con los nombres correctos para FormSubmit
+    const tempForm = document.createElement('form');
+    tempForm.action = 'https://formsubmit.co/nahuel.vera91@gmail.com';
+    tempForm.method = 'POST';
+    tempForm.style.display = 'none';
+
+    // Mapear los campos del estado a los nombres que necesita FormSubmit
+    const fieldMapping = {
+      nombreEmpresa: 'Nombre_Empresa',
+      nombrePersonaCargo: 'Persona_a_Cargo', 
+      contacto: 'Contacto_Adicional',
+      cuit: 'CUIT',
+      email: 'Email_Cliente',
+      telefono: 'Telefono',
+      direccion: 'Direccion',
+      consumidorFinalIVA: 'Consumidor_IVA',
+      horarioCorte: 'Horario_Corte',
+      horarioColecta: 'Horario_Colecta',
+      servicioFullfilment: 'Servicio_Fullfilment'
+    };
+
+    // Agregar campos de datos
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = fieldMapping[key] || key;
+        input.value = value;
+        tempForm.appendChild(input);
+      }
+    });
+
+    // Agregar configuraciones de FormSubmit
+    const configs = {
+      '_subject': `🏢 Nuevo Cliente: ${formData.nombreEmpresa || 'Sin nombre'}`,
+      '_captcha': 'false',
+      '_template': 'table',
+      '_replyto': formData.email,
+      '_autoresponse': `Hola ${formData.nombrePersonaCargo || 'estimado cliente'},\n\nGracias por contactarnos. Hemos recibido correctamente la información de ${formData.nombreEmpresa || 'su empresa'}.\n\nNos pondremos en contacto contigo pronto.\n\nSaludos cordiales.`
+    };
+
+    Object.entries(configs).forEach(([key, value]) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = value;
+      tempForm.appendChild(input);
+    });
+
+    document.body.appendChild(tempForm);
+    tempForm.submit();
   };
 
   return (
@@ -467,7 +516,7 @@ const ClientFormLanding = () => {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-4 mb-4">
-              <Building2 className="w-12 h-12 text-purple-200" />
+              <img src="./assets/logo.png" alt="logo" />
             </div>
             <h1 className="text-purple-200 text-4xl font-extrabold mb-6 leading-tight">Planilla de altas - clientes</h1>
           </div>
@@ -497,18 +546,7 @@ const ClientFormLanding = () => {
               </div>
             )}
 
-            <form 
-              action="https://formsubmit.co/nahuel.vera91@gmail.com" 
-              method="POST"
-              onSubmit={handleSubmit}
-              className="space-y-8"
-            >
-              
-              {/* Configuraciones ocultas de FormSubmit */}
-              <input type="hidden" name="_subject" value={`🏢 Nuevo Cliente: ${formData.nombreEmpresa || 'Sin nombre'}`} />
-              <input type="hidden" name="_captcha" value="false" />
-              <input type="hidden" name="_template" value="table" />
-              <input type="hidden" name="_autoresponse" value={`Hola ${formData.nombrePersonaCargo || 'estimado cliente'},\n\nGracias por contactarnos. Hemos recibido correctamente la información de ${formData.nombreEmpresa || 'su empresa'}.\n\nNos pondremos en contacto contigo pronto.\n\nSaludos cordiales.`} />
+            <form onSubmit={handleSubmit} className="space-y-8">
 
               {/* Nombre de la empresa */}
               <div className="space-y-3">
@@ -518,7 +556,7 @@ const ClientFormLanding = () => {
                 </label>
                 <input
                   type="text"
-                  name="Nombre_Empresa"
+                  name="nombreEmpresa"
                   value={formData.nombreEmpresa}
                   onChange={handleInputChange}
                   placeholder="Ingresa el nombre de la empresa"
@@ -535,7 +573,7 @@ const ClientFormLanding = () => {
                 </label>
                 <input
                   type="text"
-                  name="Persona_a_Cargo"
+                  name="nombrePersonaCargo"
                   value={formData.nombrePersonaCargo}
                   onChange={handleInputChange}
                   placeholder="Ingresa el nombre de la persona a cargo"
@@ -552,7 +590,7 @@ const ClientFormLanding = () => {
                 </label>
                 <input
                   type="text"
-                  name="Contacto_Adicional"
+                  name="contacto"
                   value={formData.contacto}
                   onChange={handleInputChange}
                   placeholder="Información de contacto adicional"
@@ -568,7 +606,7 @@ const ClientFormLanding = () => {
                 </label>
                 <input
                   type="text"
-                  name="CUIT"
+                  name="cuit"
                   value={formData.cuit}
                   onChange={handleInputChange}
                   placeholder="XX-XXXXXXXX-X"
@@ -584,15 +622,13 @@ const ClientFormLanding = () => {
                 </label>
                 <input
                   type="email"
-                  name="Email_Cliente"
+                  name="email"
                   value={formData.email}
                   onChange={handleInputChange}
                   placeholder="correo@empresa.com"
                   className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all duration-200 text-gray-700 text-lg"
                   required
                 />
-                {/* Campo oculto para _replyto */}
-                <input type="hidden" name="_replyto" value={formData.email} />
               </div>
 
               {/* Teléfono */}
@@ -603,7 +639,7 @@ const ClientFormLanding = () => {
                 </label>
                 <input
                   type="tel"
-                  name="Telefono"
+                  name="telefono"
                   value={formData.telefono}
                   onChange={handleInputChange}
                   placeholder="+54 11 1234-5678"
@@ -620,7 +656,7 @@ const ClientFormLanding = () => {
                 </label>
                 <input
                   type="text"
-                  name="Direccion"
+                  name="direccion"
                   value={formData.direccion}
                   onChange={handleInputChange}
                   placeholder="Dirección completa"
@@ -636,7 +672,7 @@ const ClientFormLanding = () => {
                   <span>Consumidor final / IVA:</span>
                 </label>
                 <select
-                  name="Consumidor_IVA"
+                  name="consumidorFinalIVA"
                   value={formData.consumidorFinalIVA}
                   onChange={handleInputChange}
                   className="w-full px-6 py-4 border-2 border-gray-200 rounded-2xl focus:border-purple-500 focus:ring-4 focus:ring-purple-100 transition-all duration-200 text-gray-700 text-lg"
@@ -656,7 +692,7 @@ const ClientFormLanding = () => {
                   <span>Horario de corte:</span>
                 </label>
                 <textarea
-                  name="Horario_Corte"
+                  name="horarioCorte"
                   value={formData.horarioCorte}
                   onChange={handleInputChange}
                   placeholder="Especifica el horario de corte"
@@ -672,7 +708,7 @@ const ClientFormLanding = () => {
                   <span>Horario de colecta:</span>
                 </label>
                 <textarea
-                  name="Horario_Colecta"
+                  name="horarioColecta"
                   value={formData.horarioColecta}
                   onChange={handleInputChange}
                   placeholder="Especifica el horario de colecta"
@@ -691,7 +727,7 @@ const ClientFormLanding = () => {
                   <label className="flex items-center space-x-3 cursor-pointer bg-green-50 px-6 py-4 rounded-2xl border-2 border-green-200 hover:bg-green-100 transition-colors">
                     <input
                       type="radio"
-                      name="Servicio_Fullfilment"
+                      name="servicioFullfilment"
                       value="SI"
                       checked={formData.servicioFullfilment === 'SI'}
                       onChange={handleInputChange}
@@ -703,7 +739,7 @@ const ClientFormLanding = () => {
                   <label className="flex items-center space-x-3 cursor-pointer bg-red-50 px-6 py-4 rounded-2xl border-2 border-red-200 hover:bg-red-100 transition-colors">
                     <input
                       type="radio"
-                      name="Servicio_Fullfilment"
+                      name="servicioFullfilment"
                       value="NO"
                       checked={formData.servicioFullfilment === 'NO'}
                       onChange={handleInputChange}
@@ -745,7 +781,7 @@ const ClientFormLanding = () => {
       <footer className="bg-purple-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
-            <Building2 className="w-8 h-8 text-purple-200" />
+            <img src="./assets/logo.png" alt="logo" />
           </div>
           <p className="text-purple-200 text-lg">
             Soluciones logísticas profesionales
