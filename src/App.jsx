@@ -38,7 +38,7 @@ const ClientFormLanding = () => {
       // Ve a https://www.md5hashgenerator.com/ y genera el hash de tu email
       // Ejemplo: si tu email es "juan@empresa.com", usa el hash MD5
       const emailHash = '4c9292f0c20eb062dc28ccaef55ba9ed'; // REEMPLAZA con el hash MD5 de tu email
-      const formSubmitUrl = `https://formsubmit.co/${emailHash}`;
+      const formSubmitUrl = `https://formsubmit.co/nahuel.vera91@gmail.com`;
 
       // OPCIÓN 2 (alternativa): Usar variable de entorno si tienes backend
       // const formSubmitUrl = `https://formsubmit.co/${process.env.REACT_APP_EMAIL_HASH}`;
