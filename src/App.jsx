@@ -400,6 +400,7 @@
 // export default ClientFormLanding;
 import React, { useState } from 'react';
 import { Send, CheckCircle } from 'lucide-react';
+import logo from './assets/logo.png'
 
 const ClientFormLanding = () => {
   const [formData, setFormData] = useState({
@@ -538,7 +539,7 @@ const ClientFormLanding = () => {
         <div className="text-center p-8">
           <CheckCircle className="w-20 h-20 text-green-400 mx-auto mb-6 animate-pulse" />
           <h2 className="text-3xl font-bold text-white mb-4">¡Formulario Enviado Correctamente!</h2>
-          <p className="text-purple-100 text-lg">Gracias por completar tu información. Te contactaremos pronto.</p>
+          
         </div>
       </div>
     );
@@ -551,7 +552,7 @@ const ClientFormLanding = () => {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-4 mb-4">
-              <img src="./assets/logo.png" alt="logo" />
+              <img src={logo} alt="logo" />
             </div>
             <h1 className="text-purple-200 text-4xl font-extrabold mb-6 leading-tight">Planilla de altas - clientes</h1>
           </div>
@@ -816,7 +817,7 @@ const ClientFormLanding = () => {
       <footer className="bg-purple-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="flex items-center justify-center space-x-4 mb-4">
-            <img src="./assets/logo.png" alt="logo" />
+            <img src={logo} alt="logo" />
           </div>
           <p className="text-purple-200 text-lg">
             Soluciones logísticas profesionales
