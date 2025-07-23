@@ -399,7 +399,7 @@
 
 // export default ClientFormLanding;
 import React, { useState } from 'react';
-import { Send, CheckCircle, Building2 } from 'lucide-react';
+import { Send, CheckCircle } from 'lucide-react';
 
 const ClientFormLanding = () => {
   const [formData, setFormData] = useState({
@@ -417,6 +417,7 @@ const ClientFormLanding = () => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState('');
 
   const handleInputChange = (e) => {
@@ -446,7 +447,7 @@ const ClientFormLanding = () => {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -455,59 +456,93 @@ const ClientFormLanding = () => {
 
     setError('');
     setIsSubmitting(true);
-    
-    // Crear un formulario temporal con los nombres correctos para FormSubmit
-    const tempForm = document.createElement('form');
-    tempForm.action = 'https://formsubmit.co/nahuel.vera91@gmail.com';
-    tempForm.method = 'POST';
-    tempForm.style.display = 'none';
 
-    // Mapear los campos del estado a los nombres que necesita FormSubmit
-    const fieldMapping = {
-      nombreEmpresa: 'Nombre_Empresa',
-      nombrePersonaCargo: 'Persona_a_Cargo', 
-      contacto: 'Contacto_Adicional',
-      cuit: 'CUIT',
-      email: 'Email_Cliente',
-      telefono: 'Telefono',
-      direccion: 'Direccion',
-      consumidorFinalIVA: 'Consumidor_IVA',
-      horarioCorte: 'Horario_Corte',
-      horarioColecta: 'Horario_Colecta',
-      servicioFullfilment: 'Servicio_Fullfilment'
-    };
+    try {
+      // Web3Forms - 100% gratis, sin límites
+      const response = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          access_key: '4bb5ce7b-23c0-4c00-b609-edb320aeda9f', 
+          from_name: formData.nombrePersonaCargo,
+          subject: `🏢 Nuevo Cliente: ${formData.nombreEmpresa}`,
+          email: formData.email,
+          message: `
+📋 DATOS DEL CLIENTE:
 
-    // Agregar campos de datos
-    Object.entries(formData).forEach(([key, value]) => {
-      if (value) {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = fieldMapping[key] || key;
-        input.value = value;
-        tempForm.appendChild(input);
+🏢 Empresa: ${formData.nombreEmpresa}
+👤 Persona a cargo: ${formData.nombrePersonaCargo}
+📞 Contacto adicional: ${formData.contacto}
+🆔 CUIT: ${formData.cuit}
+📧 Email: ${formData.email}
+📱 Teléfono: ${formData.telefono}
+📍 Dirección: ${formData.direccion}
+💼 Consumidor/IVA: ${formData.consumidorFinalIVA}
+⏰ Horario corte: ${formData.horarioCorte}
+🚚 Horario colecta: ${formData.horarioColecta}
+📦 Servicio Fullfilment: ${formData.servicioFullfilment}
+          `.trim(),
+          // Datos adicionales estructurados
+          empresa: formData.nombreEmpresa,
+          persona_cargo: formData.nombrePersonaCargo,
+          contacto_adicional: formData.contacto,
+          cuit: formData.cuit,
+          telefono: formData.telefono,
+          direccion: formData.direccion,
+          consumidor_iva: formData.consumidorFinalIVA,
+          horario_corte: formData.horarioCorte,
+          horario_colecta: formData.horarioColecta,
+          servicio_fullfilment: formData.servicioFullfilment
+        })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setIsSubmitted(true);
+        
+        // Resetear después de 4 segundos
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setFormData({
+            nombreEmpresa: '',
+            nombrePersonaCargo: '',
+            contacto: '',
+            cuit: '',
+            email: '',
+            telefono: '',
+            direccion: '',
+            consumidorFinalIVA: '',
+            horarioCorte: '',
+            horarioColecta: '',
+            servicioFullfilment: ''
+          });
+        }, 4000);
+      } else {
+        throw new Error(result.message || 'Error al enviar el formulario');
       }
-    });
-
-    // Agregar configuraciones de FormSubmit
-    const configs = {
-      '_subject': `🏢 Nuevo Cliente: ${formData.nombreEmpresa || 'Sin nombre'}`,
-      '_captcha': 'false',
-      '_template': 'table',
-      '_replyto': formData.email,
-      '_autoresponse': `Hola ${formData.nombrePersonaCargo || 'estimado cliente'},\n\nGracias por contactarnos. Hemos recibido correctamente la información de ${formData.nombreEmpresa || 'su empresa'}.\n\nNos pondremos en contacto contigo pronto.\n\nSaludos cordiales.`
-    };
-
-    Object.entries(configs).forEach(([key, value]) => {
-      const input = document.createElement('input');
-      input.type = 'hidden';
-      input.name = key;
-      input.value = value;
-      tempForm.appendChild(input);
-    });
-
-    document.body.appendChild(tempForm);
-    tempForm.submit();
+    } catch (err) {
+      console.error('Error:', err);
+      setError('Error al enviar el formulario. Por favor, intenta nuevamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (isSubmitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800 flex items-center justify-center">
+        <div className="text-center p-8">
+          <CheckCircle className="w-20 h-20 text-green-400 mx-auto mb-6 animate-pulse" />
+          <h2 className="text-3xl font-bold text-white mb-4">¡Formulario Enviado Correctamente!</h2>
+          <p className="text-purple-100 text-lg">Gracias por completar tu información. Te contactaremos pronto.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-indigo-800">
